@@ -26,13 +26,14 @@ const start = async (mnemonic: string) => {
 };
 
 async function sendTransaction(wallet: OfflineSigner) {
-	const rpcEndpoint = "https://rpc.gitopia.com";
+	const rpcEndpoint = "rpc.gitopia.com";
 	const client = await SigningStargateClient.connectWithSigner(
 		rpcEndpoint,
 		wallet
 	);
 	const [firstAccount] = await wallet.getAccounts();
 	const balance = await client.getBalance(firstAccount.address, denom);
+	console.log(balance);
 	const amount = coins(
 		Number(Number(balance.amount) - 20000).toString(),
 		denom
@@ -41,7 +42,7 @@ async function sendTransaction(wallet: OfflineSigner) {
 	const defaultGasPrice = GasPrice.fromString("0.01utlore");
 	const defaultSendFee: StdFee = calculateFee(200000, defaultGasPrice);
 	// console.log("transactionFee", defaultSendFee);
-	// console.log("amount", amount);
+	console.log("sender", firstAccount.address);
 	const transaction = await client.sendTokens(
 		firstAccount.address,
 		recipient,
@@ -49,8 +50,20 @@ async function sendTransaction(wallet: OfflineSigner) {
 		defaultSendFee,
 		"Transaction"
 	);
-	assertIsDeliverTxSuccess(transaction);
-	console.log("Successfully broadcasted", transaction.transactionHash);
+	try {
+		await new Promise((resolve) => {
+			setTimeout(() => {
+				assertIsDeliverTxSuccess(transaction);
+				console.log(
+					"Successfully broadcasted",
+					transaction.transactionHash
+				);
+				resolve;
+			}, 30 * 1000);
+		});
+	} catch (error: any) {
+		console.log(error.message);
+	}
 }
 
 var loopContinue = true;
@@ -60,10 +73,7 @@ async function ManageWork() {
 		fs.readFileSync("mnemonic.txt", { encoding: "utf-8" })
 	);
 	while (loopContinue) {
-		try {
-			await start(mnemonic[n]);
-			await new Promise((resolve) => setTimeout(resolve, 30 * 1000));
-		} catch (error) {}
+		await start(mnemonic[n]);
 		n++;
 	}
 }

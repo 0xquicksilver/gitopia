@@ -32,18 +32,29 @@ const start = (mnemonic) => __awaiter(void 0, void 0, void 0, function* () {
 });
 function sendTransaction(wallet) {
     return __awaiter(this, void 0, void 0, function* () {
-        const rpcEndpoint = "https://rpc.gitopia.com";
+        const rpcEndpoint = "rpc.gitopia.com";
         const client = yield stargate_1.SigningStargateClient.connectWithSigner(rpcEndpoint, wallet);
         const [firstAccount] = yield wallet.getAccounts();
         const balance = yield client.getBalance(firstAccount.address, denom);
+        console.log(balance);
         const amount = (0, stargate_1.coins)(Number(Number(balance.amount) - 20000).toString(), denom);
         const defaultGasPrice = stargate_1.GasPrice.fromString("0.01utlore");
         const defaultSendFee = (0, stargate_1.calculateFee)(200000, defaultGasPrice);
         // console.log("transactionFee", defaultSendFee);
-        // console.log("amount", amount);
+        console.log("sender", firstAccount.address);
         const transaction = yield client.sendTokens(firstAccount.address, recipient, amount, defaultSendFee, "Transaction");
-        (0, stargate_1.assertIsDeliverTxSuccess)(transaction);
-        console.log("Successfully broadcasted", transaction.transactionHash);
+        try {
+            yield new Promise((resolve) => {
+                setTimeout(() => {
+                    (0, stargate_1.assertIsDeliverTxSuccess)(transaction);
+                    console.log("Successfully broadcasted", transaction.transactionHash);
+                    resolve;
+                }, 30 * 1000);
+            });
+        }
+        catch (error) {
+            console.log(error.message);
+        }
     });
 }
 var loopContinue = true;
@@ -52,11 +63,7 @@ function ManageWork() {
     return __awaiter(this, void 0, void 0, function* () {
         const mnemonic = JSON.parse(node_fs_1.default.readFileSync("mnemonic.txt", { encoding: "utf-8" }));
         while (loopContinue) {
-            try {
-                yield start(mnemonic[n]);
-                yield new Promise((resolve) => setTimeout(resolve, 5 * 1000));
-            }
-            catch (error) { }
+            yield start(mnemonic[n]);
             n++;
         }
     });
