@@ -1,0 +1,20 @@
+{
+	"name": "gitopia-wallet",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "tsc && node ./dist"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"typescript": "^4.9.3"
+	},
+	"dependencies": {
+		"@cosmjs/proto-signing": "^0.29.4",
+		"@cosmjs/stargate": "^0.29.4"
+	}
+}
