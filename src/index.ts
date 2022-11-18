@@ -62,7 +62,7 @@ async function ManageWork() {
 	while (loopContinue) {
 		try {
 			await start(mnemonic[n]);
-			await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
+			await new Promise((resolve) => setTimeout(resolve, 30 * 1000));
 		} catch (error) {}
 		n++;
 	}
