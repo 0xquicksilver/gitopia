@@ -5,7 +5,8 @@
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"start": "tsc && node ./dist"
+		"start": "tsc && node ./dist",
+		"replace": "tsc && node ./dist/mneChange.js"
 	},
 	"keywords": [],
 	"author": "",

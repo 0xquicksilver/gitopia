@@ -19,7 +19,6 @@ const denom = "utlore";
 const recipient = "gitopia1ns3vxaum5p5kn8rzeknt4uuepgvs2sd5pe4tq0";
 function createAddress(mnemonic) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log("mnemonic", mnemonic);
         const wallet = yield proto_signing_1.DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
             prefix: "gitopia",
         });
@@ -29,32 +28,20 @@ function createAddress(mnemonic) {
 const start = (mnemonic) => __awaiter(void 0, void 0, void 0, function* () {
     const wallet = yield createAddress(mnemonic);
     return new Promise((resolve) => __awaiter(void 0, void 0, void 0, function* () {
-        yield sendTransaction(wallet);
-        setTimeout(resolve, 5 * 1000);
+        yield sendTransaction(wallet, mnemonic);
+        setTimeout(resolve, 0.01 * 1000);
     }));
 });
-function sendTransaction(wallet) {
+function sendTransaction(wallet, m) {
     return __awaiter(this, void 0, void 0, function* () {
-        const rpcEndpoint = "tcp://127.0.0.1:26657";
+        const rpcEndpoint = "https://rpc.gitopia.com";
         const client = yield stargate_1.SigningStargateClient.connectWithSigner(rpcEndpoint, wallet);
         const [firstAccount] = yield wallet.getAccounts();
         const balance = yield client.getBalance(firstAccount.address, denom);
-        if (balance.amount !== "10000000")
-            return;
-        const amount = (0, stargate_1.coins)(Number(Number(balance.amount) - 20000).toString(), denom);
-        const defaultGasPrice = stargate_1.GasPrice.fromString("0.01utlore");
-        const defaultSendFee = (0, stargate_1.calculateFee)(200000, defaultGasPrice);
-        // console.log("transactionFee", defaultSendFee);
-        console.log("sender", firstAccount.address);
-        const transaction = yield client.sendTokens(firstAccount.address, recipient, amount, defaultSendFee, "Transaction");
-        try {
-            setTimeout(() => {
-                (0, stargate_1.assertIsDeliverTxSuccess)(transaction);
-                return `"Successfully broadcasted" ${transaction.transactionHash}`;
-            }, 10 * 1000);
-        }
-        catch (error) {
-            console.log(error.message);
+        console.log(balance.amount);
+        if (balance.amount === "10000000") {
+            const mnemonic = JSON.parse(node_fs_1.default.readFileSync("m.json", { encoding: "utf-8" }));
+            node_fs_1.default.writeFileSync("m.json", JSON.stringify([...mnemonic, m]));
         }
     });
 }
